@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.Xbox360;
+using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace DS4Windows
 {
@@ -62,6 +63,8 @@ namespace DS4Windows
 
             cont.LeftTrigger = state.L2;
             cont.RightTrigger = state.R2;
+            double rsangle = Math.Atan2(AxisScale(state.RY, true), AxisScale(state.RX, false));
+            double epsilon = 0.02;
 
             SASteeringWheelEmulationAxisType steeringWheelMappedAxis = Global.GetSASteeringWheelEmulationAxis(device);
             switch (steeringWheelMappedAxis)
@@ -69,8 +72,14 @@ namespace DS4Windows
                 case SASteeringWheelEmulationAxisType.None:
                     cont.LeftThumbX = AxisScale(state.LX, false);
                     cont.LeftThumbY = AxisScale(state.LY, true);
-                    cont.RightThumbX = AxisScale(state.RX, false);
-                    cont.RightThumbY = AxisScale(state.RY, true);
+                    if (state.R1 && rsangle > Math.PI*5.0/8.0 - epsilon && rsangle < Math.PI*7.0/8.0 + epsilon) {
+                        cont.RightThumbX = AxisScale(state.RX, false);
+                        cont.RightThumbY = 0;
+                    }
+                    else {
+                        cont.RightThumbX = AxisScale(state.RX, false);
+                        cont.RightThumbY = AxisScale(state.RY, true);
+                    }
                     break;
 
                 case SASteeringWheelEmulationAxisType.LX:
